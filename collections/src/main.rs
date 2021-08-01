@@ -14,7 +14,7 @@ Hashmaps are like distionaries or objects in other objects
 Hashmaps are homogenous, if we want to store multiple values we can use enums or BOX 
 https://www.simonewebdesign.it/rust-hashmap-insert-values-multiple-types/ 
 */
-
+#![feature(try_reserve)]
 #[derive(Debug)]
 enum Maps {
     Str(String),
@@ -50,8 +50,17 @@ fn main() {
     map.insert("Age".to_string(), Maps::Int(22));
     map.insert("isloggedIn".to_string(), Maps::Bool(true));
  
-    println!("{:?}", map.get("Age")); // returns a Result Enum
-    for (key, value) in map {
-        println!("the minimum {} is {:?}", key, value);
+    // println!("{:?}", map.get("Age")); // returns a Result Enum
+    // for (key, value) in map {
+    //     println!("the minimum {} is {:?}", key, value);
+    // }
+    let mystr = "it’s common to check whether a particular key has a value and, if it doesn’t, insert a value for it. Hash maps have a special API for this called entry that takes the key you want to check as a parameter. The return value of the entry method is an enum called Entry that represents a value that might or might not exist. Let’s say we want to check whether the key for the Yellow team has a value associated with it. If it doesn’t, we want to insert the value 50, and the same for the Blue team. Using the entry API, the code looks like Listing";
+    let mut map2 = HashMap::new();
+    for word in mystr.split_whitespace() {
+        let count = map2.entry(word).or_insert(0);
+        *count += 1;
     }
+    
+    map2.try_reserve("hello".len()).expect("couldn't reserve more");
+    println!("{:#?} {}", map2, map2.capacity() );
 }
