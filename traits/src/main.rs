@@ -1,55 +1,125 @@
 /*
-Generics used to avoid code duplication by providing abstract syntax 
-for concrete types. There is no runtime cost for using generics as
-generics are implemented in such a way that it handles generic values using
-Monomorphization, it is the process of turning generic code into
- specific code by filling in the concrete types that are used when compiled.
-*/
+TRAITS similar to interfaces in other languages but with some differences
+Traits are used to define behaviour of a type
 
-fn main() {
-    let my_arr = [10,200,102,30,15,100,15,15,25,789,9,145,32];
-    println!("the greatest number is {:|^5} ", largest(&my_arr))
+TRAIT bounds -> the impl trait is syntax sugar for longer form of
+trait implementations called trait bounds
+
+
+*/
+use std::{any::type_name, fmt};
+pub trait Summarize {
+    fn summarize(&self) -> String;
 }
 
-// finding greatest function with concrete type
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
 
-// fn largest_num(num_arr: &[i32]) -> i32 {
-//     let mut greatest = num_arr[0];
-//     for &num in num_arr {
-//         if num > greatest { 
-//             greatest = num; 
-//         }
-//     }
-//     return greatest;
+impl Summarize for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+pub struct Tweet {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub retweet: bool,
+}
+
+impl Summarize for Tweet {
+    fn summarize(&self) -> String {
+        format!(
+            "Tweet by @{} \ncontent: {} \nis reply:{} \nis Retweet: {}",
+            self.username, self.content, self.reply, self.retweet
+        )
+    }
+}
+
+impl fmt::Display for Tweet {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "({}, {}, {}, {})",
+            self.username, self.content, self.reply, self.retweet
+        )
+    }
+}
+
+// // Trait as parameter
+// fn notify(item: &(impl Summarize + fmt::Display)) {
+//     println!("Breaking News! {}",item.summarize());
 // }
 
-// finding greatest values function with generic types
-// use std::cmp::PartialOrd; <- this is included in prelude
- 
+// // Trait bound syntax
+// fn notify<T: Summarize + fmt::Display>(item: &T) {
+//     println!("Breaking News! {}",item.summarize());
+// }
+
+// Using where clause
+fn notify<T, U>(t: &T, _u: &U)
+where
+    T: Summarize + fmt::Display,
+    U: Clone + fmt::Debug,
+{
+    println!("Breaking News! {}", t.summarize());
+}
+
+fn main() {
+    let tweet = Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from("of course, as you probably already know, people"),
+        reply: false,
+        retweet: false,
+    };
+    let vev1 = 12;
+    notify(&tweet, &vev1);
+    let p1 = Point::new(12, 14);
+    let p2 = Point::new("12", "14");
+    println!("Product of point is {:?}", p1.calc());
+    type_of(&p1);
+    type_of(&p2);
+
+}
+/*
+We are using Trait bounds to conditionally implement methods
+Those types which does not implements the second trait will not be able to
+access the method defined in that impl block
+*/
+
+#[derive(Debug)]
 struct Point<P> {
-    x:  P,
+    x: P,
     y: P,
 }
 
-impl<P: std::ops::Mul + Copy> Point<P> {
-    fn calc(&self)  -> <P as std::ops::Mul>::Output {
-        let a  = self.x * self.y;
+impl<P> Point<P> {
+    // Self (Type of current object)
+    fn new(x: P, y: P) -> Self {
+        Self { x, y }
+    }
+}
+
+fn type_of<P>(_: &P) {
+    println!("{}", type_name::<P>());
+}
+
+impl<P: std::ops::Mul<Output = P> + Copy> Point<P> {
+    fn calc(&self) -> P {
+        let a = self.x * self.y;
         return a;
     }
 }
-fn largest<T:  PartialOrd + Copy>(num_arr: &[T]) -> T {
 
-    let p1 = Point {
-        x: 1,
-        y: 2,
-    };
-    println!("{:?} area = {:->5}", (p1.x, p1.y), p1.calc());
-    
-    let mut greatest = num_arr[0];
-    for &num in num_arr {
-        if num > greatest { 
-            greatest = num; 
-        }
-    }
-    return greatest;
-}
+/*
+  We can also use implement a trait for any type that satifies the trait bound
+*/
+
+// impl<T: fmt::Display> Summarize for T {
+
+// }
