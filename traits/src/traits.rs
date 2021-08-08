@@ -117,8 +117,9 @@ impl<P: std::ops::Mul<Output = P> + Copy> Point<P> {
 }
 
 /*
-  We can also use implement a trait for any type that satifies the trait bound
-*/
+  We can also implement a trait for any type that satifies the trait bound
+Trait Summarize will only be applied to those types which implements fmt::Display trait
+  */
 
 // impl<T: fmt::Display> Summarize for T {
 
