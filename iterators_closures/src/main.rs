@@ -1,12 +1,24 @@
 use std::thread;
 use std::time::Duration;
 use std::collections::HashMap;
-use std::hash::Hash;
-// use std::fmt::Display;
 
 // A struct that is Generic over some type T which implements Trait bounds Fn
 
-// #[derive(Hash, Eq, PartialEq, Debug)]
+/*
+ FnOnce consumes the variables it captures from its enclosing scope, 
+ known as the closure’s environment. To consume the captured variables, 
+ the closure must take ownership of these variables and move them into 
+ the closure when it is defined. The Once part of the name represents 
+ the fact that the closure can’t take ownership of the same variables 
+ more than once, so it can be called only once.
+ 
+ FnMut can change the environment because it mutably borrows values.
+ Fn borrows values from the environment immutably.
+
+ If we want to force the closure to take the ownership of the captured 
+ variable we can use `move` keyword before the parameter list.
+*/
+
 struct Cacher<T>
 where
     T: Fn(u32) -> u32,
@@ -53,8 +65,10 @@ fn main() {
 // }
 
 fn generate_workout(intensity: u32, random_number: u32) {
+    let x  = String::from("hello");
+    
     let mut expensive_result = Cacher::new(|num| -> u32 {
-        println!("calculating slowly...");
+        println!("calculating slowly... \n{}", hello);
         thread::sleep(Duration::from_secs(2));
         num
     });
@@ -70,5 +84,4 @@ fn generate_workout(intensity: u32, random_number: u32) {
             println!("Today, run for {} minutes!", expensive_result.value(intensity));
         }
     }
-    println!("inside none {:?}", expensive_result.value);
 }

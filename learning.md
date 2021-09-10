@@ -10,3 +10,6 @@ Closure definitions will have one concrete type inferred for each of their param
 # Storing Closures Using Generic Parameters and the Fn Traits
 
 We will create a struct that will hold the closure and the resulting value of calling the closure. The struct will execute the closure only if we need the resulting value, and it will cache the resulting value so the rest of our code doesn’t have to be responsible for saving and reusing the result. This pattern is known as memoization or lazy evaluation.  
+
+# Capturing the environment with the closure
+
