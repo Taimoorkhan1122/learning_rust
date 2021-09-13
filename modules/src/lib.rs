@@ -1,5 +1,5 @@
 /*
-creating module front of house 
+creating module front of house
 mod (modules) let us group related defintions together
 crate
  └── front_of_house
@@ -10,34 +10,35 @@ crate
          ├── take_order
          ├── serve_order
          └── take_payment
-We can also rename external crates in cargo.TOML saying 
+We can also rename external crates in cargo.TOML saying
 bar = {package="foo",  version="..."}
 
 For making a mod public in current module but not for all we can
 use pub(crate) to make it public locally.
 */
 #[allow(dead_code)]
+// This technique is called re-exporting because we’re bringing an 
+// item into scope but also making that item available for others to 
+// bring into their scope.
 pub mod front_of_house;
 use front_of_house::{hosting, serving};
 
 #[allow(dead_code)]
 pub mod back_of_house {
-    
     pub struct Breakfast {
         pub toast: String,
         seasonal_fruit: String,
     }
-    
     impl Breakfast {
         pub fn summer(toast: &str) -> Breakfast {
             Breakfast {
                 toast: String::from(toast),
-                seasonal_fruit: String::from("peaches")
+                seasonal_fruit: String::from("peaches"),
             }
         }
     }
 
-#[derive(Debug)]
+    #[derive(Debug)]
     pub enum Appetizer {
         Soup,
         Salad,
@@ -48,7 +49,13 @@ pub mod back_of_house {
         super::front_of_house::serving::serve_order();
     }
 
-    fn cook_order() {}
+    fn cook_order() {
+        call();
+    }
+
+    pub(in crate::back_of_house) fn call() -> i32 {
+        54
+    }
 }
 
 // pub use front_of_house::hosting;
@@ -59,10 +66,14 @@ pub fn eat_at_restaurant() {
     // using use keyword we brought the path into the scope
     hosting::add_to_waitlist();
     serving::take_order();
+    // back_of_house::call(); this won't compile becuase call is only public to back_of_houses
 
     let mut meal = back_of_house::Breakfast::summer("brown");
     meal.toast = String::from("Wheat");
     let order1 = back_of_house::Appetizer::Salad;
-    
-    println!("I want a {} toast please, and I in appetizer bring me {:?}", meal.toast, order1)
+
+    println!(
+        "I want a {} toast please, and I in appetizer bring me {:?}",
+        meal.toast, order1
+    )
 }
