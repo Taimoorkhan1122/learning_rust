@@ -25,3 +25,11 @@ Rc<T> will allow us to ref data from multiple owners by keeping the Refrence cou
 We use the Rc<T> type when we want to allocate some data on the heap for multiple parts of our program to read and we can’t determine at compile time which part will finish using the data last. If we knew which part would finish last, we could just make that part the data’s owner, and the normal ownership rules enforced at compile time would take effect.
 
 ## Interior Mutability Pattern
+
+Interiour mutability is a design pattern that allows to mutate data even when there is immutable refrence to that data.
+
+### Enforcing borrow checking at runtime rather than compile time
+
+Using RefCell<T> is one way to get the ability to have interior mutability. But RefCell<T> doesn’t get around the borrowing rules completely: the borrow checker in the compiler allows this interior mutability, and the borrowing rules are checked at runtime instead. If you violate the rules, you’ll get a panic! instead of a compiler error.
+
+## Creating a Tree Data Structure
