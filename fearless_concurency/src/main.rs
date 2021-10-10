@@ -1,72 +1,44 @@
-use std::process;
-use std::sync::mpsc;
-use std::thread;
-use std::time;
-use std::time::Duration;
+// Mutex
+use std::{
+    sync::{Arc, Mutex},
+    // rc::Rc,
+    thread,
+};
 
 fn main() {
-    // let v = vec![1,2,3,4,5];
-    // let handle = thread::spawn(move ||  {
-    //     for i in v.iter() {
-    //         println!("vector {:?} at {} ", v, i);
-    //         thread::sleep(Duration::from_millis(1));
-    //     }
-    // });
-    // for i in 1..5 {
-    //     println!("Hi {} from the main thread", i);
-    //     thread::sleep(Duration::from_millis(1));
-    // }
-    // handle.join().unwrap();
+    /*
+    // Mutex allows to one thread to access data
+    let m = Mutex::new(5);
+    println!("m = {:?}", m);
 
-    let (tx, rx) = mpsc::channel();
-    let tx1 = tx.clone();
-
-    // first transmitter
-    let tx1_handle = thread::spawn(move || {
-        let vals = vec![
-            String::from("hi"),
-            String::from("from"),
-            String::from("the"),
-            String::from("first"),
-            String::from("thread"),
-        ];
-        for v in vals {
-            tx1.send(v).unwrap_or_else(|e| {
-                println!("error in sending message: {}", e);
-                process::exit(1);
-            });
-            thread::sleep(Duration::from_millis(1000))
-        }
-    });
-
-    // second transmitter
-    let tx_handle = thread::spawn(move || {
-        tx1_handle.join().unwrap();
-        let vals = vec![
-            String::from("got"),
-            String::from("some"),
-            String::from("more"),
-            String::from("from second"),
-        ];
-        for v in vals {
-            tx.send(v).unwrap_or_else(|e| {
-                println!("error in sending message: {}", e);
-                process::exit(1);
-            });
-            thread::sleep(Duration::from_millis(1000))
-        }
-    });
-
-    // let received = rx.recv().unwrap_or_else(|e| {
-    //     println!("error in parsing message: {}", e);
-    //     process::exit(1);
-    // });
-    // println!("Got message: {}", received);
-
-    // receiving multiple values
-    // tx_handle.join().unwrap();
-    let time_recv = time::Instant::now();
-    for rec in rx {
-        println!("Got message: {:15} at {} secs",rec,time_recv.elapsed().as_secs());
+    {
+        // This function will block the local thread until it is
+        // available to acquire the mutex. Upon returning, the
+        // thread is the only thread with the lock held
+        let mut new = m.lock().unwrap();
+        *new = 10
     }
+    // we don't need to release the lock as the when
+    // MutexGuard goes out of the scop the value is automatically dropped
+    println!("m = {:?}", m);
+    */
+
+    // thread-safe reference-counting pointer.
+    // 'Arc' stands for 'Atomically Reference Counted'.
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        let counter = Arc::clone(&counter);
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+            *num += 1
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    println!("Result : {}", *counter.lock().unwrap())
 }
